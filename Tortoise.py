@@ -32,17 +32,17 @@ class TortoiseCommand():
 
         try:
             vcs = TortoiseSVN(settings.get('svn_tortoiseproc_path'), path)
-        except (RepositoryNotFoundError):
+        except RepositoryNotFoundError:
             pass
 
         try:
             vcs = TortoiseGit(settings.get('git_tortoiseproc_path'), path)
-        except (RepositoryNotFoundError):
+        except RepositoryNotFoundError:
             pass
 
         try:
             vcs = TortoiseHg(settings.get('hg_hgtk_path'), path)
-        except (RepositoryNotFoundError):
+        except RepositoryNotFoundError:
             pass
 
         if vcs == None:
@@ -60,7 +60,7 @@ def handles_not_found(fn):
     def handler(self, *args, **kwargs):
         try:
             fn(self, *args, **kwargs)
-        except (NotFoundError) as (exception):
+        except NotFoundError as exception:
             sublime.error_message('Tortoise: ' + str(exception))
     return handler
 
@@ -72,7 +72,7 @@ def invisible_when_not_found(fn):
             if res != None:
                 return res
             return True
-        except (NotFoundError):
+        except NotFoundError:
             return False
     return handler
 
@@ -355,7 +355,7 @@ class Tortoise():
 
         try:
             status = vcs.check_status(path)
-        except (Exception) as (exception):
+        except Exception as exception:
             sublime.error_message(str(exception))
 
         file_status_cache[path] = {
@@ -465,7 +465,7 @@ class TortoiseHg(Tortoise):
             try:
                 self.set_binary_path('TortoiseHg\\thgw.exe',
                     'thgw.exe', 'hg_hgtk_path')
-            except (NotFoundError):
+            except NotFoundError:
                 self.set_binary_path('TortoiseHg\\hgtk.exe',
                     'thgw.exe (for TortoiseHg v2.x) or hgtk.exe (for ' +
                     'TortoiseHg v1.x)', 'hg_hgtk_path')
