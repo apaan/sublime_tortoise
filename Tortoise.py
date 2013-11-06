@@ -275,9 +275,19 @@ class TortoiseRevertCommand(sublime_plugin.WindowCommand, TortoiseCommand):
 
 class ForkGui():
     def __init__(self, cmd, cwd):
-        subprocess.Popen(cmd, stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-            cwd=cwd)
+        if os.name == 'nt':
+            subprocess.Popen(cmd, stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                cwd=cwd)
+        else:
+            if isinstance(cmd, (str, unicode)):
+                subprocess.Popen('wine ' + cmd, stdin=subprocess.PIPE,
+                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                    cwd=cwd, shell=True)
+            else:
+                subprocess.Popen(['wine'] + list(cmd), stdin=subprocess.PIPE,
+                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                    cwd=cwd, shell=True)
 
 
 class Tortoise():
@@ -337,7 +347,7 @@ class Tortoise():
         if path in file_status_cache and file_status_cache[path]['time'] > \
                 time.time() - settings.get('cache_length'):
             if settings.get('debug'):
-                print 'Fetching cached status for %s' % path
+                print('Fetching cached status for %s' % path)
             return file_status_cache[path]['status']
 
         if settings.get('debug'):
@@ -354,8 +364,8 @@ class Tortoise():
         }
 
         if settings.get('debug'):
-            print 'Fetching status for %s in %s seconds' % (path,
-                str(time.time() - start_time))
+            print('Fetching status for %s in %s seconds' % (path,
+                str(time.time() - start_time)))
 
         return status
 
@@ -512,8 +522,12 @@ class TortoiseHg(Tortoise):
 
 class NonInteractiveProcess():
     def __init__(self, args, cwd=None):
-        self.args = args
+        if os.name != 'nt' and '.exe' in args[0]:
+            self.args = ['wine'] + args
+        else
+            self.args = args
         self.cwd  = cwd
+
 
     def run(self):
         startupinfo = None
