@@ -5,6 +5,10 @@ import subprocess
 import re
 import time
 
+try:
+    unicode
+except:
+    unicode = str
 
 class RepositoryNotFoundError(Exception):
     pass
@@ -524,7 +528,7 @@ class NonInteractiveProcess():
     def __init__(self, args, cwd=None):
         if os.name != 'nt' and '.exe' in args[0]:
             self.args = ['wine'] + args
-        else
+        else:
             self.args = args
         self.cwd  = cwd
 
@@ -539,7 +543,7 @@ class NonInteractiveProcess():
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
             startupinfo=startupinfo, cwd=self.cwd)
 
-        return proc.stdout.read().replace('\r\n', '\n').rstrip(' \n\r')
+        return str(proc.stdout.read()).replace('\r\n', '\n').rstrip(' \n\r')
 
 
 class SVN():
